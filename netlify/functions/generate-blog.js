@@ -66,69 +66,13 @@ export const handler = async (event) => {
     const textResult = await textModel.generateContent(textPrompt);
     const blogContent = textResult.response.text();
 
-    // Step 2: Generate image with Imagen
-    let imageBase64 = null;
-    try {
-      const imageModel = genAI.getGenerativeModel({
-        model: 'imagen-3.0-generate-001'
-      });
-
-      const imagePrompt = `Create a high-quality, professional blog post featured image about "${topic}".
-Style: Clean, modern, and visually appealing.
-The image should be suitable for a blog post header.
-Aspect ratio: 4:3 (1024x768)`;
-
-      const imageResult = await imageModel.generateContent({
-        contents: [{
-          role: 'user',
-          parts: [{ text: imagePrompt }]
-        }],
-        generationConfig: {
-          temperature: 0.4,
-          topP: 0.8,
-          topK: 40,
-        }
-      });
-
-      // Extract image data
-      if (imageResult.response && imageResult.response.candidates && imageResult.response.candidates[0]) {
-        const candidate = imageResult.response.candidates[0];
-        if (candidate.content && candidate.content.parts) {
-          for (const part of candidate.content.parts) {
-            if (part.inlineData && part.inlineData.data) {
-              imageBase64 = part.inlineData.data;
-              break;
-            }
-          }
-        }
-      }
-    } catch (imageError) {
-      console.error('Image generation error:', imageError);
-      // Continue without image if generation fails
-    }
-
-    // Step 3: Combine content with image
-    let finalHtml = blogContent;
-
-    if (imageBase64) {
-      const imageTag = `<img src="data:image/png;base64,${imageBase64}" alt="${topic}" style="max-width: 100%; height: auto; margin: 20px 0;" />`;
-
-      // Insert image after the first h2 tag or at the beginning
-      const h2Index = finalHtml.indexOf('</h2>');
-      if (h2Index !== -1) {
-        finalHtml = finalHtml.slice(0, h2Index + 5) + '\n' + imageTag + '\n' + finalHtml.slice(h2Index + 5);
-      } else {
-        finalHtml = imageTag + '\n' + finalHtml;
-      }
-    }
-
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        html: finalHtml,
-        hasImage: !!imageBase64,
+        html: blogContent,
+        hasImage: false,
       }),
     };
 
