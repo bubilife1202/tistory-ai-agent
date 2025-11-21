@@ -46,23 +46,20 @@ GEMINI_API_KEY=your_actual_api_key_here
 
 ### 3. 개발 서버 실행
 
+**중요**: Netlify Functions를 로컬에서 실행하려면 반드시 `netlify dev`를 사용해야 합니다.
+
 ```bash
 npm run dev
 ```
 
-브라우저에서 `http://localhost:5173`으로 접속합니다.
+이 명령어는 자동으로 `netlify dev`를 실행하여:
+- Vite 개발 서버 시작 (`http://localhost:8888`)
+- Netlify Functions 로컬 실행
+- 환경 변수 (.env) 자동 로드
 
-### 4. Netlify Functions 로컬 테스트 (선택사항)
+브라우저에서 **`http://localhost:8888`**로 접속합니다.
 
-Netlify CLI를 사용하여 Functions를 로컬에서 테스트할 수 있습니다:
-
-```bash
-# Netlify CLI 설치 (전역)
-npm install -g netlify-cli
-
-# Netlify Dev 서버 실행
-netlify dev
-```
+> **참고**: 기존 Vite만 실행하려면 `npm run dev:vite`를 사용하세요 (단, Netlify Functions는 작동하지 않습니다).
 
 ## 배포 (Netlify)
 
