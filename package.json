@@ -4,8 +4,7 @@
   "type": "module",
   "description": "AI-powered blog post generator for Tistory using Gemini",
   "scripts": {
-    "dev": "netlify dev",
-    "dev:vite": "vite",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"

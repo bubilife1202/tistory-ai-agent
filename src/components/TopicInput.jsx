@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Wand2 } from 'lucide-react'
 
-function TopicInput({ onGenerate, isLoading }) {
+function TopicInput({ onGenerate, isLoading, disabled }) {
   const [topic, setTopic] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (topic.trim() && !isLoading) {
+    if (topic.trim() && !isLoading && !disabled) {
       onGenerate(topic.trim())
     }
   }
@@ -26,15 +26,15 @@ function TopicInput({ onGenerate, isLoading }) {
             id="topic"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="예: 인공지능의 미래, 건강한 식습관, 여행 팁 등"
+            placeholder={disabled ? "먼저 API 키를 입력하고 저장해주세요" : "예: 인공지능의 미래, 건강한 식습관, 여행 팁 등"}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-            disabled={isLoading}
+            disabled={isLoading || disabled}
           />
         </div>
 
         <button
           type="submit"
-          disabled={!topic.trim() || isLoading}
+          disabled={!topic.trim() || isLoading || disabled}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
         >
           <Wand2 className="w-5 h-5" />
