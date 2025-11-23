@@ -16,17 +16,6 @@ function App() {
   const generateBlogText = async (topic, ai) => {
     setLoadingStage('📝 블로그 텍스트 생성 중...')
 
-    const model = ai.models.getGenerativeModel({
-      model: 'gemini-1.5-pro',
-      systemInstruction: `당신은 사실에 입각한 정보만 제공하는 전문 블로거입니다.
-1. 모든 정보는 사실 여부를 검증하고, 확실하지 않은 내용은 포함하지 마십시오.
-2. 사실 기반의 내용에는 반드시 신뢰할 수 있는 출처(URL 등)를 괄호 안에 명시하십시오.
-3. 추측성 글쓰기를 금지합니다.
-4. HTML 태그(h2, h3, b, p, ul, li)를 사용하여 가독성 좋게 작성하십시오. 별도의 CSS 스타일은 인라인으로 넣지 말고 시맨틱 태그만 사용하십시오.
-5. 블로그 글은 최소 800자 이상으로 작성하고, 구조화된 형태로 작성하십시오.
-6. 제목(h2), 소제목(h3), 본문(p), 목록(ul, li) 등을 적절히 활용하십시오.`
-    })
-
     const prompt = `"${topic}"에 대한 Tistory 블로그 포스팅을 작성해주세요.
 
 요구사항:
@@ -38,8 +27,21 @@ function App() {
 - CSS 스타일 없이 시맨틱 태그만 사용
 - 이미지는 삽입하지 마세요`
 
-    const result = await model.generateContent(prompt)
-    return result.response.text()
+    const systemInstruction = `당신은 사실에 입각한 정보만 제공하는 전문 블로거입니다.
+1. 모든 정보는 사실 여부를 검증하고, 확실하지 않은 내용은 포함하지 마십시오.
+2. 사실 기반의 내용에는 반드시 신뢰할 수 있는 출처(URL 등)를 괄호 안에 명시하십시오.
+3. 추측성 글쓰기를 금지합니다.
+4. HTML 태그(h2, h3, b, p, ul, li)를 사용하여 가독성 좋게 작성하십시오. 별도의 CSS 스타일은 인라인으로 넣지 말고 시맨틱 태그만 사용하십시오.
+5. 블로그 글은 최소 800자 이상으로 작성하고, 구조화된 형태로 작성하십시오.
+6. 제목(h2), 소제목(h3), 본문(p), 목록(ul, li) 등을 적절히 활용하십시오.`
+
+    const result = await ai.models.generateContent({
+      model: 'gemini-1.5-pro',
+      contents: prompt,
+      systemInstruction: systemInstruction
+    })
+
+    return result.text
   }
 
   // Generate image with Gemini 3 Pro Image (Nano Banana Pro)
@@ -70,9 +72,12 @@ Output: Single hero image for blog post header.`
     })
 
     // Extract Base64 image
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData && part.inlineData.data) {
-        return part.inlineData.data
+    if (response.candidates && response.candidates[0]) {
+      const parts = response.candidates[0].content.parts
+      for (const part of parts) {
+        if (part.inlineData && part.inlineData.data) {
+          return part.inlineData.data
+        }
       }
     }
 
@@ -140,8 +145,8 @@ Output: Single hero image for blog post header.`
 
       if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('API key')) {
         setError('API 키가 올바르지 않습니다. API 키를 다시 확인해주세요.')
-      } else if (err.message?.includes('quota')) {
-        setError('API 할당량이 초과되었습니다. 잠시 후 다시 시도해주세요.')
+      } else if (err.message?.includes('quota') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+        setError('API 할당량이 초과되었습니다. Gemini 3 Pro Image는 무료 티어 제한이 있습니다. 이미지 생성 체크박스를 해제하거나 잠시 후 다시 시도해주세요.')
       } else {
         setError(`블로그 포스트 생성 중 오류가 발생했습니다: ${err.message}`)
       }
